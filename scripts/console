@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Start an irb console with the gem loaded"
+#MISE alias=["c", "con"]
+
+set -e
+
+bundle exec irb -r rubocop-hanami

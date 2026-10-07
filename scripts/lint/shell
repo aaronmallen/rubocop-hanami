@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+#MISE description="Lint all shell files"
+#MISE alias=["l:sh", "l:shell", "lint:sh"]
+
+set -e
+
+shfmt -d scripts
+find scripts -type f -exec shellcheck {} +

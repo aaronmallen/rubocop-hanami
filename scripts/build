@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+#MISE description="Build the gem"
+#MISE alias=["b"]
+
+set -e
+
+mkdir -p pkg
+gem build rubocop-hanami.gemspec -o \
+  "pkg/rubocop-hanami-$(ruby -e "puts Gem::Specification.load('rubocop-hanami.gemspec').version").gem"

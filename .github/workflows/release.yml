@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.*"
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  wait-for-build:
+    name: Wait for build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Wait for the Build workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sha="${{ github.sha }}"
+          echo "Waiting for the Build workflow on $sha"
+          while true; do
+            result=$(gh api "repos/${{ github.repository }}/actions/workflows/build.yml/runs" \
+              --jq ".workflow_runs[] | select(.head_sha == \"$sha\") | .conclusion" | head -1)
+            case "$result" in
+              success) echo "Build passed"; exit 0 ;;
+              failure | cancelled | timed_out) echo "Build $result"; exit 1 ;;
+              *) echo "Build still running"; sleep 30 ;;
+            esac
+          done
+
+  create-release:
+    name: Create release
+    needs: wait-for-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Create the release
+        uses: taiki-e/create-gh-release-action@v1
+        with:
+          changelog: CHANGELOG.md
+          draft: false
+          title: v$tag
+          token: ${{ secrets.GITHUB_TOKEN }}

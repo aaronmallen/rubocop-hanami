@@ -1,0 +1,11 @@
+Hanami/SliceExports:
+  Description: Checks that each slice exports a literal list of allowed keys.
+  Enabled: true
+  VersionAdded: "0.1.0"
+  Include:
+    - "**/config/slices/*.rb"
+    - "**/slices/*/config/slice.rb"
+  ForbiddenExports: []
+  ParentClasses:
+    - Hanami::Slice
+  RequireExport: true

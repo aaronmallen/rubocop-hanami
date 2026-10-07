@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Lint all ruby files"
+#MISE alias=["l:rb", "l:ruby", "lint:rb"]
+
+set -e
+
+bundle exec rubocop --config .config/.rubocop.yml

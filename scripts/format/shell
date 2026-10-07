@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Format all shell files"
+#MISE alias=["fmt:sh", "fmt:shell", "format:sh"]
+
+set -e
+
+shfmt -w scripts

@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+#MISE description="Lint all files for editorconfig violations"
+#MISE alias=["l:ec", "l:editorconfig", "lint:ec"]
+
+set -e
+
+# Upstream renamed the binary from `ec` to `editorconfig-checker`, and which name mise installs
+# depends on the mise release as well as the tool's, so a laptop and CI can disagree. Run it rather
+# than `command -v` it: a mise shim left by another version passes `command -v` and then fails.
+if editorconfig-checker -version >/dev/null 2>&1; then
+  ec=editorconfig-checker
+else
+  ec=ec
+fi
+
+"$ec" -config .config/editorconfig-checker.json
