@@ -413,6 +413,40 @@ Hanami/UnwrappedStep:
     - call
 ```
 
+### Hanami/SliceNamespace
+
+Zeitwerk expects `slices/admin/actions/users/index.rb` to define `Admin::Actions::Users::Index`. A mismatch raises
+at load time, often far from the file at fault. This cop checks that each top-level `module` and `class` in a slice
+opens the slice's namespace.
+
+```ruby
+# slices/admin/actions/users/index.rb
+
+# bad
+module Backoffice
+  module Actions
+  end
+end
+
+# good
+module Admin
+  module Actions
+  end
+end
+```
+
+The cop camelizes the slice's directory, so `admin_panel` gives `AdminPanel`, and checks only the first segment of
+each name. Zeitwerk checks the rest. For nested slices, the innermost one counts. Name slices that don't camelize
+plainly in `Inflections`:
+
+```yaml
+Hanami/SliceNamespace:
+  Inflections:
+    api: API
+```
+
+It skips slice routes, slice settings and slice `db`, where files may take another form.
+
 ## License
 
 [MIT](LICENSE)

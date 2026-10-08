@@ -131,3 +131,15 @@ Hanami/UnwrappedStep:
     - "lib/**/*.rb"
   FlowMethods:
     - call
+
+Hanami/SliceNamespace:
+  Description: Checks that files in a slice open the slice's namespace.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "slices/**/*.rb"
+  Exclude:
+    - "slices/*/config/routes.rb"
+    - "slices/*/config/settings.rb"
+    - "slices/*/db/**/*"
+  Inflections: {}
