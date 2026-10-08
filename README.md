@@ -306,6 +306,45 @@ Hanami/ActionCallOverride:
     - MyApp::Action
 ```
 
+### Hanami/UnvalidatedParams
+
+Without a schema, `request.params` holds raw input: strings, any keys, no coercion. This cop flags `[]`, `fetch`
+and `dig` on the params of the first argument of `handle`, whatever it is named, in an action that declares no
+`params` or `contract`.
+
+```ruby
+# bad
+class Actions::Users::Show < App::Action
+  def handle(request, response)
+    id = request.params[:id]
+  end
+end
+
+# good
+class Actions::Users::Show < App::Action
+  params do
+    required(:id).filled(:integer)
+  end
+
+  def handle(request, response)
+    halt 422 unless request.params.valid?
+
+    id = request.params[:id]
+  end
+end
+```
+
+The cop can't see a `params` declared in a parent action. Name validated base classes in `AllowedParentClasses` to
+skip their subclasses:
+
+```yaml
+Hanami/UnvalidatedParams:
+  AllowedParentClasses:
+    - Admin::Action
+```
+
+Schemas need `dry-validation`. An app without it can turn the cop off.
+
 ## License
 
 [MIT](LICENSE)

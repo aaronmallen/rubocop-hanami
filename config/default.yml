@@ -104,3 +104,11 @@ Hanami/ActionCallOverride:
     - "slices/**/*.rb"
   ParentClasses:
     - Hanami::Action
+
+Hanami/UnvalidatedParams:
+  Description: Checks for `request.params` reads in an action with no `params` or `contract`.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "**/actions/**/*.rb"
+  AllowedParentClasses: []
