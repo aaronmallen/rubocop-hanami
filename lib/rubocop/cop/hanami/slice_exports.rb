@@ -84,7 +84,7 @@ module RuboCop
         def message_for(key)
           return MSG_FORBIDDEN if matches?("ForbiddenExports", key)
 
-          MSG_NOT_ALLOWED if cop_config.key?("AllowedExports") && !matches?("AllowedExports", key)
+          MSG_NOT_ALLOWED if Array(cop_config["AllowedExports"]).any? && !matches?("AllowedExports", key)
         end
 
         def slice_class?(node)

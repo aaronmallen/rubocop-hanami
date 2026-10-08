@@ -117,8 +117,8 @@ RSpec.describe RuboCop::Cop::Hanami::SliceExports, :config do
     end
   end
 
-  context "without AllowedExports" do
-    let(:cop_config) { { "ParentClasses" => ["Hanami::Slice"] } }
+  context "with an empty AllowedExports" do
+    let(:cop_config) { { "AllowedExports" => [], "ParentClasses" => ["Hanami::Slice"] } }
 
     it "accepts any key" do
       expect_no_offenses(<<~RUBY)

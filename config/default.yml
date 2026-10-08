@@ -5,6 +5,7 @@ Hanami/SliceExports:
   Include:
     - "**/config/slices/*.rb"
     - "**/slices/*/config/slice.rb"
+  AllowedExports: []
   ForbiddenExports: []
   ParentClasses:
     - Hanami::Slice
