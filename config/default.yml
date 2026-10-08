@@ -112,3 +112,11 @@ Hanami/UnvalidatedParams:
   Include:
     - "**/actions/**/*.rb"
   AllowedParentClasses: []
+
+Hanami/ProviderTopLevelRequire:
+  Description: Checks for `require` in a provider outside `prepare` and `start`.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "**/config/providers/*.rb"
+    - "**/slices/*/config/providers/*.rb"

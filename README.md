@@ -345,6 +345,34 @@ Hanami/UnvalidatedParams:
 
 Schemas need `dry-validation`. An app without it can turn the cop off.
 
+### Hanami/ProviderTopLevelRequire
+
+A `require` at the top of a provider file runs when the file loads. Inside `prepare`, it runs only when the
+provider prepares, as the Hanami guides show. This cop flags `require` and `require_relative` in a provider outside
+`prepare` and `start`.
+
+```ruby
+# bad
+require "sidekiq"
+
+Hanami.app.register_provider(:sidekiq) do
+  start do
+    register "sidekiq", Sidekiq
+  end
+end
+
+# good
+Hanami.app.register_provider(:sidekiq) do
+  prepare do
+    require "sidekiq"
+  end
+
+  start do
+    register "sidekiq", Sidekiq
+  end
+end
+```
+
 ## License
 
 [MIT](LICENSE)
