@@ -105,6 +105,43 @@ Hanami/ContainerLookup:
     - Admin::Slice
 ```
 
+### Hanami/AppReferenceInSlice
+
+A slice should depend only on its own container and what it imports. `Hanami.app` ties it to the host app, so it
+can't be moved, extracted or loaded alone. This cop flags `Hanami.app` in `slices`, but skips slice `config`, where
+settings and providers may need the app.
+
+```ruby
+# bad
+class Admin::Actions::Users::Index < Admin::Action
+  def handle(request, response)
+    Hanami.app.settings.page_size
+  end
+end
+
+# good
+class Admin::Actions::Users::Index < Admin::Action
+  include Deps["settings"]
+
+  def handle(request, response)
+    settings.page_size
+  end
+end
+```
+
+When `Hanami/ContainerLookup` is on, this cop leaves lookups such as `Hanami.app["logger"]` to it, so a line isn't
+flagged twice.
+
+To flag constants from the host app too, name its top-level modules in `AppNamespaces`. The cop can't learn them
+from one file, so the list starts empty. Hanami's generator gives each slice a base action that inherits from
+`MyApp::Action`, so expect to disable the cop for that file.
+
+```yaml
+Hanami/AppReferenceInSlice:
+  AppNamespaces:
+    - MyApp
+```
+
 ## License
 
 [MIT](LICENSE)

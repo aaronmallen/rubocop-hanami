@@ -24,3 +24,13 @@ Hanami/ContainerLookup:
     - "slices/*/config/**/*"
     - "spec/**/*"
   AllowedReceivers: []
+
+Hanami/AppReferenceInSlice:
+  Description: Checks for references to `Hanami.app` from a slice.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "slices/**/*.rb"
+  Exclude:
+    - "slices/*/config/**/*"
+  AppNamespaces: []
