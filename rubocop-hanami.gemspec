@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = "rubocop-hanami"
-  spec.version = "0.1.0"
+  spec.version = "0.2.0"
   spec.authors = ["Aaron Allen"]
   spec.email = ["hello@aaronmallen.me"]
 
