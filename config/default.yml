@@ -75,3 +75,22 @@ Hanami/UnusedDeps:
     - "app/**/*.rb"
     - "slices/**/*.rb"
     - "lib/**/*.rb"
+
+Hanami/EnvAccess:
+  Description: Checks for `ENV` outside settings and providers.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "**/*.rb"
+  Exclude:
+    - "bin/**/*"
+    - "config.ru"
+    - "config/app.rb"
+    - "config/providers/**/*"
+    - "config/puma.rb"
+    - "config/settings.rb"
+    - "db/**/*"
+    - "Rakefile"
+    - "slices/*/config/providers/**/*"
+    - "slices/*/config/settings.rb"
+    - "spec/**/*"

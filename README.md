@@ -253,6 +253,28 @@ The cop sees one file, so it flags a dependency that only a subclass reads. Disa
 include Deps["repos.user_repo"] # rubocop:disable Hanami/UnusedDeps
 ```
 
+### Hanami/EnvAccess
+
+Hanami settings give each value a name, a type and a check at boot. A raw `ENV` read skips all three, and a missing
+variable shows up at request time. This cop flags `ENV` and `::ENV`, reads and writes alike.
+
+```ruby
+# bad
+class Mailers::Welcome
+  def from = ENV.fetch("MAIL_FROM")
+end
+
+# good
+class Mailers::Welcome
+  include Deps["settings"]
+
+  def from = settings.mail_from
+end
+```
+
+It checks every Ruby file but skips settings, providers, `config/app.rb`, `config/puma.rb`, `bin`, `db` and `spec`,
+where `ENV` belongs.
+
 ## License
 
 [MIT](LICENSE)
