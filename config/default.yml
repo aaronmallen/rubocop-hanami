@@ -66,3 +66,12 @@ Hanami/PersistenceInAction:
   ForbiddenKeyPrefixes:
     - repos.
     - relations.
+
+Hanami/UnusedDeps:
+  Description: Checks for keys in `include Deps[...]` that the class never reads.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+    - "lib/**/*.rb"

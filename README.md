@@ -218,6 +218,41 @@ Hanami/PersistenceInAction:
 It overlaps `Hanami/RelationOutsideRepo` for `relations.` keys, so a relation in an action gets two reports while
 both are on.
 
+### Hanami/UnusedDeps
+
+A stale dependency still gets resolved, still boots its provider and still shows up as a constructor argument. This
+cop flags a key in `include Deps[...]` whose accessor the class never reads.
+
+```ruby
+# bad
+class Operations::CreateUser
+  include Deps["repos.user_repo", "mailers.welcome"]
+
+  def call(input)
+    user_repo.create(input)
+  end
+end
+
+# good
+class Operations::CreateUser
+  include Deps["repos.user_repo"]
+
+  def call(input)
+    user_repo.create(input)
+  end
+end
+```
+
+A read is a bare call or a call on `self`, the instance variable the kwargs strategy sets, or `send`,
+`public_send`, `__send__` or `method` with a literal symbol. The cop skips a class that passes `Deps` anything but
+literal keys, or that calls `send` with a name it can't read, and it skips modules.
+
+The cop sees one file, so it flags a dependency that only a subclass reads. Disable it on that line:
+
+```ruby
+include Deps["repos.user_repo"] # rubocop:disable Hanami/UnusedDeps
+```
+
 ## License
 
 [MIT](LICENSE)
