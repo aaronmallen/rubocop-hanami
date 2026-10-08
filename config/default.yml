@@ -120,3 +120,14 @@ Hanami/ProviderTopLevelRequire:
   Include:
     - "**/config/providers/*.rb"
     - "**/slices/*/config/providers/*.rb"
+
+Hanami/UnwrappedStep:
+  Description: Checks for calls in an operation's flow that return a Result but skip `step`.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+    - "lib/**/*.rb"
+  FlowMethods:
+    - call

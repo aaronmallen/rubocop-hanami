@@ -373,6 +373,46 @@ Hanami.app.register_provider(:sidekiq) do
 end
 ```
 
+### Hanami/UnwrappedStep
+
+dry-operation halts on failure only through `step`. A bare call to a method that returns a Result drops the
+`Failure`, and the flow carries on as if it worked. This cop flags such a call in an operation's flow.
+
+```ruby
+# bad
+class Operations::CreateUser < App::Operation
+  def call(input)
+    validate(input)
+    user_repo.create(input)
+  end
+
+  private
+
+  def validate(input)
+    input[:email] ? Success(input) : Failure(:no_email)
+  end
+end
+
+# good
+class Operations::CreateUser < App::Operation
+  def call(input)
+    attrs = step validate(input)
+    step create(attrs)
+  end
+end
+```
+
+With no types to go on, the cop works within one class. A method returns a Result when its last expression, or a
+`return`, is `Success(...)` or `Failure(...)`. A flow method is one of `FlowMethods` or a name the class passes to
+`operate_on`. The cop skips a call whose value is assigned, used as a receiver or passed on, and it can't see
+Results from injected dependencies.
+
+```yaml
+Hanami/UnwrappedStep:
+  FlowMethods:
+    - call
+```
+
 ## License
 
 [MIT](LICENSE)
