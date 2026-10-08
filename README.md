@@ -70,6 +70,41 @@ Hanami/SliceExports:
     - MyApp::Slice
 ```
 
+### Hanami/ContainerLookup
+
+A lookup such as `Admin::Slice["repos.user_repo"]` hides a dependency from the constructor, so a test can't pass a
+stub through `new`. This cop flags a lookup by literal string key on `Hanami.app`, on `Hanami.app.slices[...]`,
+and on any constant that ends in `Slice`.
+
+```ruby
+# bad
+class Admin::Actions::Users::Show < Admin::Action
+  def handle(request, response)
+    user = Admin::Slice["repos.user_repo"].find(request.params[:id])
+  end
+end
+
+# good
+class Admin::Actions::Users::Show < Admin::Action
+  include Deps["repos.user_repo"]
+
+  def handle(request, response)
+    user = user_repo.find(request.params[:id])
+  end
+end
+```
+
+It also catches code that reaches into another slice's container without `import`.
+
+It checks `app`, `slices` and `lib`, but skips `config`, slice `config` and `spec`, where providers, routes and specs
+need lookups. To skip a constant that wraps the container on purpose, name it in `AllowedReceivers`:
+
+```yaml
+Hanami/ContainerLookup:
+  AllowedReceivers:
+    - Admin::Slice
+```
+
 ## License
 
 [MIT](LICENSE)

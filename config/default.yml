@@ -10,3 +10,17 @@ Hanami/SliceExports:
   ParentClasses:
     - Hanami::Slice
   RequireExport: true
+
+Hanami/ContainerLookup:
+  Description: Checks for container lookups where `include Deps[...]` would do.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+    - "lib/**/*.rb"
+  Exclude:
+    - "config/**/*"
+    - "slices/*/config/**/*"
+    - "spec/**/*"
+  AllowedReceivers: []
