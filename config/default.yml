@@ -55,3 +55,14 @@ Hanami/RelationOutsideRepo:
   ROMKeys:
     - db.rom
     - persistence.rom
+
+Hanami/PersistenceInAction:
+  Description: Checks for repos and relations in an action's `include Deps[...]`.
+  Enabled: false
+  VersionAdded: "0.2.0"
+  Include:
+    - "**/actions/**/*.rb"
+  AllowedKeys: []
+  ForbiddenKeyPrefixes:
+    - repos.
+    - relations.

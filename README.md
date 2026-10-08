@@ -175,6 +175,49 @@ Hanami/RelationOutsideRepo:
     - persistence.rom
 ```
 
+### Hanami/PersistenceInAction
+
+Some teams want actions to do only HTTP work and hand the rest to an operation, so persistence and business rules
+live in one place that tests can call without a request. This cop flags a repo or relation in an action's
+`include Deps[...]`. It is off by default; turn it on if your team works this way.
+
+```ruby
+# bad
+class Actions::Users::Create < App::Action
+  include Deps["repos.user_repo"]
+
+  def handle(request, response)
+    user_repo.create(request.params[:user])
+  end
+end
+
+# good
+class Actions::Users::Create < App::Action
+  include Deps["operations.create_user"]
+
+  def handle(request, response)
+    create_user.call(request.params[:user])
+  end
+end
+```
+
+`ForbiddenKeyPrefixes` match at the start of any segment of the key, so an imported `search.repos.index` counts
+too. `AllowedKeys` takes strings, matched exactly, and regular expressions, to let keys such as a read-only query
+repo through:
+
+```yaml
+Hanami/PersistenceInAction:
+  Enabled: true
+  AllowedKeys:
+    - repos.user_queries
+  ForbiddenKeyPrefixes:
+    - repos.
+    - relations.
+```
+
+It overlaps `Hanami/RelationOutsideRepo` for `relations.` keys, so a relation in an action gets two reports while
+both are on.
+
 ## License
 
 [MIT](LICENSE)
