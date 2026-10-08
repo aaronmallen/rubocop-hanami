@@ -275,6 +275,37 @@ end
 It checks every Ruby file but skips settings, providers, `config/app.rb`, `config/puma.rb`, `bin`, `db` and `spec`,
 where `ENV` belongs.
 
+### Hanami/ActionCallOverride
+
+`Hanami::Action#call(env)` is the Rack entry point. It builds the request and response, runs callbacks and params
+validation, then calls `handle`. Defining `call` replaces all of that. This cop flags `def call` in an action.
+
+```ruby
+# bad
+class Actions::Home::Show < App::Action
+  def call(env)
+    [200, {}, ["hi"]]
+  end
+end
+
+# good
+class Actions::Home::Show < App::Action
+  def handle(request, response)
+    response.body = "hi"
+  end
+end
+```
+
+A class counts as an action when it lives in a file under `actions` or inherits from one of `ParentClasses`. The
+cop skips a `call` that calls `super`, so a base action may wrap `call` on purpose.
+
+```yaml
+Hanami/ActionCallOverride:
+  ParentClasses:
+    - Hanami::Action
+    - MyApp::Action
+```
+
 ## License
 
 [MIT](LICENSE)

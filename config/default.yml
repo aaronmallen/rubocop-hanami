@@ -94,3 +94,13 @@ Hanami/EnvAccess:
     - "slices/*/config/providers/**/*"
     - "slices/*/config/settings.rb"
     - "spec/**/*"
+
+Hanami/ActionCallOverride:
+  Description: Checks for `def call` in an action, where `handle` belongs.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+  ParentClasses:
+    - Hanami::Action
