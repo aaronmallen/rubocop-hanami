@@ -142,6 +142,39 @@ Hanami/AppReferenceInSlice:
     - MyApp
 ```
 
+### Hanami/RelationOutsideRepo
+
+Repos are the boundary to the database. When an action, operation or view queries a relation, query logic spreads
+across layers. This cop flags a relation, or the ROM container that hands them out, in `include Deps[...]` outside
+`repos`, `relations` and `db`.
+
+```ruby
+# bad
+class Operations::ListUsers
+  include Deps["relations.users"]
+
+  def call = users.where(active: true).to_a
+end
+
+# good
+class Operations::ListUsers
+  include Deps["repos.user_repo"]
+
+  def call = user_repo.active
+end
+```
+
+`RelationKeyPrefixes` names the start of a relation's key, and `ROMKeys` names the keys of the ROM container:
+
+```yaml
+Hanami/RelationOutsideRepo:
+  RelationKeyPrefixes:
+    - relations.
+  ROMKeys:
+    - db.rom
+    - persistence.rom
+```
+
 ## License
 
 [MIT](LICENSE)

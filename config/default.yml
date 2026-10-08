@@ -34,3 +34,24 @@ Hanami/AppReferenceInSlice:
   Exclude:
     - "slices/*/config/**/*"
   AppNamespaces: []
+
+Hanami/RelationOutsideRepo:
+  Description: Checks for relations in `include Deps[...]` outside a repo.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+  Exclude:
+    - "app/db/**/*"
+    - "app/relations/**/*"
+    - "app/repos/**/*"
+    - "slices/*/config/**/*"
+    - "slices/*/db/**/*"
+    - "slices/*/relations/**/*"
+    - "slices/*/repos/**/*"
+  RelationKeyPrefixes:
+    - relations.
+  ROMKeys:
+    - db.rom
+    - persistence.rom
