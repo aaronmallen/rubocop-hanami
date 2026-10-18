@@ -435,9 +435,19 @@ module Admin
 end
 ```
 
-The cop camelizes the slice's directory, so `admin_panel` gives `AdminPanel`, and checks only the first segment of
-each name. Zeitwerk checks the rest. For nested slices, the innermost one counts. Name slices that don't camelize
-plainly in `Inflections`:
+The cop camelizes the slice's directory word by word, as Hanami does, so `admin_panel` gives `AdminPanel`, and checks
+only the first segment of each name. Zeitwerk checks the rest. For nested slices, the innermost one counts.
+
+It reads the acronyms in `config/app.rb`, next to your `.rubocop.yml`, so this needs no cop config:
+
+```ruby
+config.inflections do |inflections|
+  inflections.acronym "TMAS"
+end
+```
+
+With it, `slices/tmas_gate_counts` belongs in `TMASGateCounts`. Add more in `Inflections`, keyed by word or by whole
+slice name:
 
 ```yaml
 Hanami/SliceNamespace:
