@@ -13,7 +13,7 @@ module RuboCop
       # skips modules, since `include Deps` in a module serves whatever class includes it.
       #
       # The cop sees one file, so it flags a dependency that only a subclass reads. Disable it with a
-      # comment on that key.
+      # comment on that key, or name it in `AllowedNames` to never flag it.
       #
       # @example
       #   # bad
@@ -33,6 +33,12 @@ module RuboCop
       #       user_repo.create(input)
       #     end
       #   end
+      #
+      # @example AllowedNames: [contract]
+      #   # good
+      #   class Operations::SaveTask < MyApp::Operation
+      #     include Deps[contract: "contracts.task"]
+      #   end
       class UnusedDeps < Base
         include DepsKeys
 
@@ -45,7 +51,7 @@ module RuboCop
           arguments = deps_arguments_in(node)
           return unless checkable?(node, arguments)
 
-          used = used_names(node)
+          used = used_names(node) + Array(cop_config["AllowedNames"])
           each_deps_key(arguments) do |key_node, name|
             next if name.nil? || used.include?(name)
 

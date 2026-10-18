@@ -103,4 +103,17 @@ RSpec.describe RuboCop::Cop::Hanami::UnusedDeps, :config do
       end
     RUBY
   end
+
+  context "with AllowedNames" do
+    let(:cop_config) { { "AllowedNames" => ["contract"] } }
+
+    it "accepts a name in the list" do
+      expect_offense(<<~RUBY)
+        class Operations::SaveTask < MyApp::Operation
+          include Deps[contract: "contracts.task", log: "log"]
+                                                        ^^^^^ `log` from `Deps["log"]` is never used.
+        end
+      RUBY
+    end
+  end
 end

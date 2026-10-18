@@ -75,6 +75,7 @@ Hanami/UnusedDeps:
     - "app/**/*.rb"
     - "slices/**/*.rb"
     - "lib/**/*.rb"
+  AllowedNames: []
 
 Hanami/EnvAccess:
   Description: Checks for `ENV` outside settings and providers.

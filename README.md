@@ -253,6 +253,14 @@ The cop sees one file, so it flags a dependency that only a subclass reads. Disa
 include Deps["repos.user_repo"] # rubocop:disable Hanami/UnusedDeps
 ```
 
+Or name it in `AllowedNames`, and the cop never flags it in any class:
+
+```yaml
+Hanami/UnusedDeps:
+  AllowedNames:
+    - contract
+```
+
 ### Hanami/EnvAccess
 
 Hanami settings give each value a name, a type and a check at boot. A raw `ENV` read skips all three, and a missing
