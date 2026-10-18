@@ -7,8 +7,9 @@ module RuboCop
       # dependency still gets resolved, still boots its provider and still shows up as a constructor
       # argument.
       #
-      # A read is a bare call or a call on `self`, the instance variable the kwargs strategy sets, or
-      # `send`, `public_send`, `__send__` or `method` with a literal symbol. The cop skips a class
+      # A read is a bare call or a call on `self`, the instance variable the kwargs strategy sets,
+      # `send`, `public_send`, `__send__` or `method` with a literal symbol, or a keyword argument
+      # of `initialize` read outside `super`. The cop skips a class
       # that passes `Deps` anything but literal keys, or calls `send` with a name it can't read. It
       # skips modules, since `include Deps` in a module serves whatever class includes it.
       #
@@ -45,6 +46,7 @@ module RuboCop
         MSG = "`%<name>s` from `Deps[\"%<key>s\"]` is never used."
 
         def_node_matcher :dynamic_send?, "(send _ {:send :public_send :__send__} !sym ...)"
+        def_node_search :initializers, "(def :initialize ...)"
         def_node_matcher :literal_send, "(send _ {:send :public_send :__send__ :method} (sym $_) ...)"
 
         def on_class(node)
@@ -73,16 +75,26 @@ module RuboCop
           children.compact.filter_map { |child| deps_arguments(child) }.flatten
         end
 
+        # Passing a keyword on to `super` doesn't count, since the kwargs strategy needs that to inject it.
+        def keyword_reads(method)
+          keywords = method.arguments.select { |argument| argument.type?(:kwarg, :kwoptarg) }.map(&:name)
+          reads = method.each_descendant(:lvar).select { |lvar| lvar.each_ancestor(:super).none? }.map(&:name)
+          (keywords & reads).map(&:to_s)
+        end
+
         def literal?(argument)
           argument.str_type? || (argument.hash_type? && argument.pairs.all? { |pair| literal_alias?(pair) })
         end
 
-        def used_names(node)
-          node.each_descendant(:send, :ivar).to_set do |read|
-            next read.children.first.to_s.delete_prefix("@") if read.ivar_type?
+        def read_name(read)
+          return read.children.first.to_s.delete_prefix("@") if read.ivar_type?
 
-            literal_send(read)&.to_s || (read.method_name.to_s if read.receiver.nil? || read.receiver.self_type?)
-          end
+          literal_send(read)&.to_s || (read.method_name.to_s if read.receiver.nil? || read.receiver.self_type?)
+        end
+
+        def used_names(node)
+          reads = node.each_descendant(:send, :ivar).to_set { |read| read_name(read) }
+          reads.merge(initializers(node).flat_map { |method| keyword_reads(method) })
         end
       end
     end

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe RuboCop::Cop::Hanami::UnusedDeps, :config do
+  let(:ruby_version) { 3.3 }
+
   it "registers an offense for a key the class never reads" do
     expect_offense(<<~RUBY)
       class Operations::CreateUser
@@ -60,6 +62,33 @@ RSpec.describe RuboCop::Cop::Hanami::UnusedDeps, :config do
 
         def call
           [@ivar, public_send(:sent), method(:method)]
+        end
+      end
+    RUBY
+  end
+
+  it "accepts a keyword of initialize read in its body" do
+    expect_no_offenses(<<~RUBY)
+      class Operations::Build
+        include Deps["operations.build_document"]
+
+        def initialize(build_document:, **)
+          @descriptor = build_document.descriptor(:foo)
+          super(build_document:, **)
+        end
+      end
+    RUBY
+  end
+
+  it "registers an offense for a keyword of initialize only passed to super" do
+    expect_offense(<<~RUBY)
+      class Operations::Build
+        include Deps["log", "operations.build_document"]
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^ `build_document` from `Deps["operations.build_document"]` is never used.
+
+        def initialize(build_document:, **)
+          log.info("building")
+          super(build_document:, **)
         end
       end
     RUBY

@@ -243,8 +243,9 @@ class Operations::CreateUser
 end
 ```
 
-A read is a bare call or a call on `self`, the instance variable the kwargs strategy sets, or `send`,
-`public_send`, `__send__` or `method` with a literal symbol. The cop skips a class that passes `Deps` anything but
+A read is a bare call or a call on `self`, the instance variable the kwargs strategy sets, `send`,
+`public_send`, `__send__` or `method` with a literal symbol, or a keyword argument of `initialize` read outside
+`super`. The cop skips a class that passes `Deps` anything but
 literal keys, or that calls `send` with a name it can't read, and it skips modules.
 
 The cop sees one file, so it flags a dependency that only a subclass reads. Disable it on that line:
