@@ -30,9 +30,7 @@ module RuboCop
         # One index per project root, shared by every file in the run. `reads` takes a class or module
         # node and returns its Definition#reads.
         def for(root, processed_source, &reads)
-          index = @indexes[root] ||= new(root, processed_source, reads)
-          index.refresh
-          index
+          (@indexes[root] ||= new(root, processed_source, reads)).tap(&:refresh)
         end
 
         def mtime(root, path)
@@ -75,19 +73,19 @@ module RuboCop
         end
       end
 
-      # Every definition that inherits from `name`, at any depth.
-      def descendants(name, seen = Set[name])
-        @children.fetch(name, []).flat_map do |child|
-          seen.add?(child.name) ? [child, *descendants(child.name, seen)] : []
-        end
-      end
-
       def definition(node, reads = @reads.call(node))
         name = self.class.name_of(node)
         scopes = self.class.scopes_of(node)
         parents = mixins(node).map { |constant| [constant.source, [name, *scopes]] }
         parents.unshift([node.parent_class.source, scopes]) if node.class_type? && node.parent_class&.const_type?
         Definition.new(name, parents, reads)
+      end
+
+      # Every definition that inherits from `name`, at any depth.
+      def descendants(name, seen = Set[name])
+        @children.fetch(name, []).flat_map do |child|
+          seen.add?(child.name) ? [child, *descendants(child.name, seen)] : []
+        end
       end
 
       # Parses only the files added or touched since the last scan.
