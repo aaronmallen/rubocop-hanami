@@ -224,6 +224,28 @@ RSpec.describe RuboCop::Cop::Hanami::UnusedDeps, :config do
       RUBY
     end
 
+    context "with subclasses" do
+      before do
+        write "lib/blog/repo.rb", <<~RUBY
+          class Blog::Repo
+            include Deps["relations.users", "relations.roles", "queries.thread_queries", log: "log"]
+          end
+        RUBY
+        write "lib/blog/user_repo.rb", "module Blog; class UserRepo < Repo; def find = users.first; end; end"
+        write "lib/blog/admin_repo.rb", "module Blog; class AdminRepo < UserRepo; def admins = roles.all; end; end"
+        write "slices/main/thread_repo.rb", "class Main::ThreadRepo < Blog::Repo; include MyApp::Threads; end"
+      end
+
+      it "accepts names its subclasses read, at any depth and through their mixins" do
+        expect_offense(<<~RUBY)
+          class Blog::Repo
+          include Deps["relations.users", "relations.roles", "queries.thread_queries", log: "log"]
+                                                                                            ^^^^^ `log` from `Deps["log"]` is never used.
+          end
+        RUBY
+      end
+    end
+
     it "skips a class whose parent calls send with a name it can't read" do
       write "lib/blog/dynamic.rb", "class Blog::Dynamic; def call(name) = send(name); end"
 

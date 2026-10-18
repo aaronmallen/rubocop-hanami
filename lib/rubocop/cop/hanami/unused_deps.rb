@@ -13,13 +13,13 @@ module RuboCop
       # that passes `Deps` anything but literal keys, or calls `send` with a name it can't read. It
       # skips modules, since `include Deps` in a module serves whatever class includes it.
       #
-      # A dependency also counts as used when a parent class or mixin reads it. The cop indexes the
-      # classes and modules under `app`, `lib` and `slices` to follow them, and stops at constants the
-      # project doesn't define, such as `Hanami::Action`. It skips the class if one of them calls `send`
-      # with a name it can't read.
+      # A dependency also counts as used when a parent class, a subclass at any depth, or a mixin of
+      # either reads it. The cop indexes the classes and modules under `app`, `lib` and `slices` to
+      # follow them, and stops at constants the project doesn't define, such as `Hanami::Action`. It
+      # skips the class if one of them calls `send` with a name it can't read.
       #
-      # It still flags a dependency that only a subclass reads, or one read somewhere it can't follow.
-      # Disable it with a comment on that key, or name it in `AllowedNames` to never flag it.
+      # It still flags a dependency read somewhere it can't follow. Disable it with a comment on that
+      # key, or name it in `AllowedNames` to never flag it.
       #
       # @example
       #   # bad
@@ -66,11 +66,11 @@ module RuboCop
           unused = unused_keys(arguments, used_names(node) + Array(cop_config["AllowedNames"]))
           return if unused.empty?
 
-          inherited = inherited_reads(node)
-          return unless inherited
+          related = related_reads(node)
+          return unless related
 
           unused.each do |key_node, name|
-            add_offense(key_node, message: format(MSG, name: name, key: key_node.value)) unless inherited.include?(name)
+            add_offense(key_node, message: format(MSG, name: name, key: key_node.value)) unless related.include?(name)
           end
         end
 
@@ -94,14 +94,6 @@ module RuboCop
           children.compact.filter_map { |child| deps_arguments(child) }.flatten
         end
 
-        # The names every parent class and mixin of `node` reads, or nil when one of them reads names the
-        # cop can't see.
-        def inherited_reads(node)
-          index = class_index
-          reads = index.ancestors(index.definition(node, nil)).map(&:reads)
-          reads.sum(Set[]) if reads.all?
-        end
-
         # Passing a keyword on to `super` doesn't count, since the kwargs strategy needs that to inject it.
         def keyword_reads(method)
           keywords = method.arguments.select { |argument| argument.type?(:kwarg, :kwoptarg) }.map(&:name)
@@ -117,6 +109,14 @@ module RuboCop
           return read.children.first.to_s.delete_prefix("@") if read.ivar_type?
 
           literal_send(read)&.to_s || (read.method_name.to_s if read.receiver.nil? || read.receiver.self_type?)
+        end
+
+        # The names every parent, child and mixin of `node` reads, or nil when one of them reads names
+        # the cop can't see.
+        def related_reads(node)
+          index = class_index
+          reads = index.related(index.definition(node, nil)).map(&:reads)
+          reads.sum(Set[]) if reads.all?
         end
 
         def unused_keys(arguments, used)

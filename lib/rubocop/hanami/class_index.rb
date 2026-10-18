@@ -3,7 +3,8 @@
 module RuboCop
   module Hanami
     # Indexes the classes and modules defined under a project's `app`, `lib` and `slices`, so a cop can
-    # follow a class to the parents and mixins it inherits from, across files.
+    # follow a class to the parents and mixins it inherits from, and to the classes that inherit from
+    # it, across files.
     class ClassIndex
       extend NodePattern::Macros
 
@@ -74,6 +75,13 @@ module RuboCop
         end
       end
 
+      # Every definition that inherits from `name`, at any depth.
+      def descendants(name, seen = Set[name])
+        @children.fetch(name, []).flat_map do |child|
+          seen.add?(child.name) ? [child, *descendants(child.name, seen)] : []
+        end
+      end
+
       def definition(node, reads = @reads.call(node))
         name = self.class.name_of(node)
         scopes = self.class.scopes_of(node)
@@ -89,10 +97,30 @@ module RuboCop
 
         @checked_at = now
         @files = Dir.glob(GLOB, base: @root).to_h { |path| [path, file_entry(path)] }
-        @definitions = @files.values.flat_map(&:last).group_by(&:name)
+        definitions = @files.values.flat_map(&:last)
+        @definitions = definitions.group_by(&:name)
+        @children = children_of(definitions)
+      end
+
+      # Everything whose reads count for `definition`: its ancestors, its descendants, and the ancestors
+      # of those descendants, such as a mixin a subclass includes.
+      def related(definition)
+        family = [definition, *descendants(definition.name)]
+        (family.drop(1) + family.flat_map { |member| ancestors(member) }).uniq
       end
 
       private
+
+      def children_of(definitions)
+        children = Hash.new { |hash, name| hash[name] = [] }
+        definitions.each do |child|
+          child.parents.each do |constant, scopes|
+            name = resolve(constant, scopes, child.name)
+            children[name] << child if name
+          end
+        end
+        children
+      end
 
       def file_entry(path)
         mtime = self.class.mtime(@root, path)

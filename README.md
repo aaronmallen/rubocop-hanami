@@ -248,14 +248,14 @@ A read is a bare call or a call on `self`, the instance variable the kwargs stra
 `super`. The cop skips a class that passes `Deps` anything but
 literal keys, or that calls `send` with a name it can't read, and it skips modules.
 
-A dependency also counts as used when a parent class or an included module reads it, in any file under `app`,
-`lib` or `slices`. The cop follows them up as many levels as the project defines and stops at constants from
-outside it, such as `Hanami::Action`. It skips the class if one of them calls `send` with a name it can't read.
+A dependency also counts as used when a parent class, a subclass at any depth, or a module either one includes
+reads it, in any file under `app`, `lib` or `slices`. The cop stops at constants from outside the project, such as
+`Hanami::Action`, and skips the class if one of the others calls `send` with a name it can't read.
 
 Since the result depends on other files, any change under those directories clears RuboCop's cached results, for
 every cop and every file, while this cop is on.
 
-The cop still flags a dependency that only a subclass reads. Disable it on that line:
+To keep a dependency the cop can't see read, disable it on that line:
 
 ```ruby
 include Deps["repos.user_repo"] # rubocop:disable Hanami/UnusedDeps
