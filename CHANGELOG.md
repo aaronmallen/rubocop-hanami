@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.1] - 2026-10-18
+
+### Added
+
+- `AllowedNames` for `Hanami/UnusedDeps`, a list of accessor names the cop never flags in any class. Use it for names
+  read somewhere the cop can't follow. It also hides a real unused dependency of that name, so keep the list short.
+
+### Changed
+
+- `Hanami/UnusedDeps` counts a dependency as used when a parent class, a subclass at any depth, or a module either
+  one includes reads it. A base operation that reads `contract` while each subclass injects its own no longer flags
+  every subclass. The cop parses every file under `app`, `lib` and `slices` to follow them, and stops at constants
+  the project doesn't define, such as `Hanami::Action`.
+- While `Hanami/UnusedDeps` is on, any change to a file under `app`, `lib` or `slices` clears RuboCop's cached
+  results for every cop and every file, since one class's result now depends on others.
+- `Hanami/SliceNamespace` reads the acronyms in `config/app.rb`, so `inflections.acronym "TMAS"` turns
+  `tmas_gate_counts` into `TMASGateCounts` with no cop config. `Inflections` keys now match word by word as well as
+  by whole slice name.
+
+### Fixed
+
+- `Hanami/UnusedDeps` flagged a dependency that `initialize` took as a keyword and read in its body. A keyword only
+  passed on to `super` still counts as unused.
+
 ## [v0.2.0] - 2026-10-07
 
 ### Added
@@ -53,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ParentClasses` names the superclasses that mark a class as a slice, `Hanami::Slice` by default.
   `RequireExport: false` lets a slice leave out `export`.
 
-[Unreleased]: https://github.com/aaronmallen/rubocop-hanami/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/aaronmallen/rubocop-hanami/compare/0.2.1...HEAD
+[v0.2.1]: https://github.com/aaronmallen/rubocop-hanami/releases/tag/0.2.1
 [v0.2.0]: https://github.com/aaronmallen/rubocop-hanami/releases/tag/0.2.0
 [v0.1.0]: https://github.com/aaronmallen/rubocop-hanami/releases/tag/0.1.0
