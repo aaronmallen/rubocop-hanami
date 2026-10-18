@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "tmpdir"
+
 RSpec.describe RuboCop::Cop::Hanami::UnusedDeps, :config do
   let(:ruby_version) { 3.3 }
 
@@ -143,6 +145,100 @@ RSpec.describe RuboCop::Cop::Hanami::UnusedDeps, :config do
                                                         ^^^^^ `log` from `Deps["log"]` is never used.
         end
       RUBY
+    end
+  end
+
+  context "with parents and mixins in other files" do
+    let(:root) { Dir.mktmpdir }
+
+    before do
+      write "lib/blog/operation.rb", <<~RUBY
+        module Blog
+          class Operation < Dry::Operation
+            def validate(input) = contract.call(input)
+          end
+        end
+      RUBY
+      write "lib/blog/logged_operation.rb", <<~RUBY
+        module Blog
+          class LoggedOperation < Operation
+          end
+        end
+      RUBY
+      write "app/threads.rb", <<~RUBY
+        module MyApp
+          module Threads
+            def threads = thread_queries.all
+          end
+        end
+      RUBY
+      allow(config).to receive(:base_dir_for_path_parameters).and_return(root)
+    end
+
+    after { FileUtils.remove_entry(root) }
+
+    def write(path, source)
+      FileUtils.mkdir_p(File.dirname(File.join(root, path)))
+      File.write(File.join(root, path), source)
+    end
+
+    it "accepts a name a parent reads" do
+      expect_no_offenses(<<~RUBY)
+        module Tasks
+          module Operations
+            class SaveTask < Blog::Operation
+              include Deps[contract: "contracts.task_contract"]
+            end
+          end
+        end
+      RUBY
+    end
+
+    it "accepts a name a grandparent reads" do
+      expect_no_offenses(<<~RUBY)
+        class LogTask < Blog::LoggedOperation
+          include Deps[contract: "contracts.task_contract"]
+        end
+      RUBY
+    end
+
+    it "accepts a name an included module reads" do
+      expect_no_offenses(<<~RUBY)
+        module MyApp
+          module Actions
+            class Index < MyApp::Action
+              include Threads
+              include Deps["queries.thread_queries"]
+            end
+          end
+        end
+      RUBY
+    end
+
+    it "registers an offense for a name no parent reads" do
+      expect_offense(<<~RUBY)
+        class SaveTask < Blog::Operation
+        include Deps[contract: "contracts.task_contract", logger: "log"]
+                                                                  ^^^^^ `logger` from `Deps["log"]` is never used.
+        end
+      RUBY
+    end
+
+    it "skips a class whose parent calls send with a name it can't read" do
+      write "lib/blog/dynamic.rb", "class Blog::Dynamic; def call(name) = send(name); end"
+
+      expect_no_offenses(<<~RUBY)
+        class SaveTask < Blog::Dynamic
+          include Deps["log"]
+        end
+      RUBY
+    end
+
+    it "changes the cache checksum when a file changes" do
+      checksum = cop.external_dependency_checksum
+      File.utime(Time.now, Time.now + 10, File.join(root, "lib/blog/operation.rb"))
+
+      expect(cop.external_dependency_checksum).not_to eq(checksum)
     end
   end
 end

@@ -2,6 +2,7 @@
 
 require "rubocop"
 
+require_relative "rubocop/hanami/class_index"
 require_relative "rubocop/hanami/plugin"
 require_relative "rubocop/cop/hanami/mixin/deps_keys"
 
