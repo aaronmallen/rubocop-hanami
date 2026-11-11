@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Format all ruby files"
+#MISE alias=["fmt:rb", "fmt:ruby", "format:rb"]
+
+set -e
+
+bundle exec rubocop --config .config/.rubocop.yml -a

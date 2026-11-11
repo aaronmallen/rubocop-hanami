@@ -1,0 +1,10 @@
+{
+  "Exclude": [
+    ".idea",
+    ".mise",
+    ".mise-data",
+    "coverage",
+    "pkg",
+    "tmp"
+  ]
+}

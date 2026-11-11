@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Run tests for the project"
+#MISE alias=["t"]
+
+set -e
+
+bundle exec rspec --require spec_helper "$@"

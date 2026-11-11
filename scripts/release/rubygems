@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+#MISE description="Push the gem to rubygems.org"
+#MISE depends=["build"]
+
+set -e
+
+version="$(ruby -e "puts Gem::Specification.load('rubocop-hanami.gemspec').version")"
+
+gem push "pkg/rubocop-hanami-${version}.gem"

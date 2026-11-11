@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+#MISE description="Push the gem to gem.coop under @aaron"
+#MISE depends=["build"]
+#USAGE arg "<push_key>" help="API key for gem.coop"
+
+set -e
+
+version="$(ruby -e "puts Gem::Specification.load('rubocop-hanami.gemspec').version")"
+
+# usage_push_key comes from the USAGE arg above, set by mise.
+# shellcheck disable=SC2154
+GEM_HOST_API_KEY="${usage_push_key}" gem push "pkg/rubocop-hanami-${version}.gem" --host https://gem.coop/@aaron

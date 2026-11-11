@@ -1,0 +1,9 @@
+.bundle
+.claude/settings.local.json
+*.gem
+coverage
+Gemfile.lock
+*.gemfile.lock
+pkg
+spec/examples.txt
+tmp

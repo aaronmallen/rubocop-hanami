@@ -1,0 +1,20 @@
+# frozen_string_literal: true
+
+require "rubocop"
+
+require_relative "rubocop/hanami/class_index"
+require_relative "rubocop/hanami/plugin"
+require_relative "rubocop/cop/hanami/mixin/deps_keys"
+
+require_relative "rubocop/cop/hanami/action_call_override"
+require_relative "rubocop/cop/hanami/app_reference_in_slice"
+require_relative "rubocop/cop/hanami/container_lookup"
+require_relative "rubocop/cop/hanami/env_access"
+require_relative "rubocop/cop/hanami/persistence_in_action"
+require_relative "rubocop/cop/hanami/provider_top_level_require"
+require_relative "rubocop/cop/hanami/relation_outside_repo"
+require_relative "rubocop/cop/hanami/slice_exports"
+require_relative "rubocop/cop/hanami/slice_namespace"
+require_relative "rubocop/cop/hanami/unused_deps"
+require_relative "rubocop/cop/hanami/unvalidated_params"
+require_relative "rubocop/cop/hanami/unwrapped_step"

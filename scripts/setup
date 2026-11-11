@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+#MISE description="Setup the development environment"
+#MISE alias=["su"]
+
+set -e
+
+mise trust >/dev/null 2>&1
+mise install
+bundle install

@@ -1,0 +1,146 @@
+Hanami/SliceExports:
+  Description: Checks that each slice exports a literal list of allowed keys.
+  Enabled: true
+  VersionAdded: "0.1.0"
+  Include:
+    - "**/config/slices/*.rb"
+    - "**/slices/*/config/slice.rb"
+  AllowedExports: []
+  ForbiddenExports: []
+  ParentClasses:
+    - Hanami::Slice
+  RequireExport: true
+
+Hanami/ContainerLookup:
+  Description: Checks for container lookups where `include Deps[...]` would do.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+    - "lib/**/*.rb"
+  Exclude:
+    - "config/**/*"
+    - "slices/*/config/**/*"
+    - "spec/**/*"
+  AllowedReceivers: []
+
+Hanami/AppReferenceInSlice:
+  Description: Checks for references to `Hanami.app` from a slice.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "slices/**/*.rb"
+  Exclude:
+    - "slices/*/config/**/*"
+  AppNamespaces: []
+
+Hanami/RelationOutsideRepo:
+  Description: Checks for relations in `include Deps[...]` outside a repo.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+  Exclude:
+    - "app/db/**/*"
+    - "app/relations/**/*"
+    - "app/repos/**/*"
+    - "slices/*/config/**/*"
+    - "slices/*/db/**/*"
+    - "slices/*/relations/**/*"
+    - "slices/*/repos/**/*"
+  RelationKeyPrefixes:
+    - relations.
+  ROMKeys:
+    - db.rom
+    - persistence.rom
+
+Hanami/PersistenceInAction:
+  Description: Checks for repos and relations in an action's `include Deps[...]`.
+  Enabled: false
+  VersionAdded: "0.2.0"
+  Include:
+    - "**/actions/**/*.rb"
+  AllowedKeys: []
+  ForbiddenKeyPrefixes:
+    - repos.
+    - relations.
+
+Hanami/UnusedDeps:
+  Description: Checks for keys in `include Deps[...]` that the class never reads.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+    - "lib/**/*.rb"
+  AllowedNames: []
+
+Hanami/EnvAccess:
+  Description: Checks for `ENV` outside settings and providers.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "**/*.rb"
+  Exclude:
+    - "bin/**/*"
+    - "config.ru"
+    - "config/app.rb"
+    - "config/providers/**/*"
+    - "config/puma.rb"
+    - "config/settings.rb"
+    - "db/**/*"
+    - "Rakefile"
+    - "slices/*/config/providers/**/*"
+    - "slices/*/config/settings.rb"
+    - "spec/**/*"
+
+Hanami/ActionCallOverride:
+  Description: Checks for `def call` in an action, where `handle` belongs.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+  ParentClasses:
+    - Hanami::Action
+
+Hanami/UnvalidatedParams:
+  Description: Checks for `request.params` reads in an action with no `params` or `contract`.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "**/actions/**/*.rb"
+  AllowedParentClasses: []
+
+Hanami/ProviderTopLevelRequire:
+  Description: Checks for `require` in a provider outside `prepare` and `start`.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "**/config/providers/*.rb"
+    - "**/slices/*/config/providers/*.rb"
+
+Hanami/UnwrappedStep:
+  Description: Checks for calls in an operation's flow that return a Result but skip `step`.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "app/**/*.rb"
+    - "slices/**/*.rb"
+    - "lib/**/*.rb"
+  FlowMethods:
+    - call
+
+Hanami/SliceNamespace:
+  Description: Checks that files in a slice open the slice's namespace.
+  Enabled: true
+  VersionAdded: "0.2.0"
+  Include:
+    - "slices/**/*.rb"
+  Exclude:
+    - "slices/*/config/routes.rb"
+    - "slices/*/config/settings.rb"
+    - "slices/*/db/**/*"
+  Inflections: {}

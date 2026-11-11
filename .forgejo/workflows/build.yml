@@ -1,0 +1,94 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    tags:
+      - "[0-9]+.*"
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ forgejo.workflow }}-${{ forgejo.ref }}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@v7
+
+      - name: Install mise
+        uses: https://github.com/jdx/mise-action@v4
+
+      - name: Setup
+        run: mise run setup
+
+      - name: Lint
+        run: mise run lint
+
+  test:
+    name: Test (Ruby ${{ matrix.ruby }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - "3.3"
+          - "3.4"
+          - "4.0"
+    env:
+      MISE_RUBY_VERSION: ${{ matrix.ruby }}
+    steps:
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@v7
+
+      - name: Install mise
+        uses: https://github.com/jdx/mise-action@v4
+
+      - name: Setup
+        run: mise run setup
+
+      - name: Test
+        run: mise run test
+
+  release:
+    name: Create release
+    if: forgejo.event_name == 'push' && startsWith(forgejo.ref, 'refs/tags/')
+    needs:
+      - lint
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@v7
+
+      - name: Extract release notes
+        env:
+          TAG: ${{ forgejo.ref_name }}
+        run: |
+          awk -v heading="## [v$TAG]" '
+            /^## / { if (found) exit; found = index($0, heading) == 1; next }
+            found { print }
+            END { if (!found) exit 1 }
+          ' CHANGELOG.md > release-notes.md
+          printf '\n' >> release-notes.md
+          grep '^\[[^]]*\]:' CHANGELOG.md >> release-notes.md
+
+      - name: Create the release
+        uses: https://code.forgejo.org/actions/forgejo-release@v2.13.4
+        with:
+          direction: upload
+          url: ${{ forgejo.server_url }}
+          repo: ${{ forgejo.repository }}
+          tag: ${{ forgejo.ref_name }}
+          sha: ${{ forgejo.sha }}
+          title: v${{ forgejo.ref_name }}
+          token: ${{ forgejo.token }}
+          release-notes-file: release-notes.md
+          skip-assets: true
