@@ -1,5 +1,7 @@
 # RuboCop::Hanami
 
+[![Discord][discord-badge]][discord-link]
+
 [RuboCop](https://rubocop.org) cops for [Hanami](https://hanamirb.org) apps and slices.
 
 ## Installation
@@ -476,3 +478,7 @@ It skips slice routes, slice settings and slice `db`, where files may take anoth
 ## License
 
 [MIT](LICENSE)
+
+[discord-badge]:
+https://img.shields.io/discord/1441938388780585062?style=for-the-badge&logo=discord&logoColor=white&label=Discord&labelColor=%235865F2
+[discord-link]: https://discord.gg/PqQdhf9VMF
